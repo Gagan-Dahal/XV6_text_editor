@@ -20,13 +20,7 @@ static int console_raw_mode = 0;
 static int console_echo = 1; //to echo characters when in cooked mode 
 
 
-void
-console_setmode(int raw){
-  cli();
-  console_raw_mode = raw ? 1:0;
-  console_echo = raw ? 0:1;
-  sti();
-}
+
 
 static void consputc(int);
 
@@ -324,5 +318,18 @@ consoleinit(void)
   cons.locking = 1;
 
   ioapicenable(IRQ_KBD, 0);
+}
+
+void
+console_setmode(int raw){
+  cli();
+  console_raw_mode = raw ? 1:0;
+  console_echo = raw ? 0:1;
+
+  if(!raw){
+    input.e = input.w;
+  }
+
+  sti();
 }
 

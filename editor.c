@@ -4,6 +4,13 @@
 #include "fcntl.h"
 
 
+//TO-DO 
+//IMPLEMENT 
+/*Improve the ctrl+x, ctrl+o functionalities
+    Add cursor conrtol
+        Implement copy paste(as possible)*/
+
+
 #define MAX_lines 512
 #define MAX_COLS 128
 
@@ -116,17 +123,23 @@ void write_file(const char* filename){
     }
 }
 
+
 int main(int argc, char*argv[]){
     if(argc != 2){
         printf(1, "The correct syntax is: editor <filename>\n");
         exit();
     }
 
+ //   setconsole(1);//This make the ctrl+x, ctrl+o work but makes it so that the console doesnot buffer, needs some tweaking
+
     char* filename = argv[1];
     printf(1, "%s\n", filename);
     load_file(filename);
     display_buffer();
     write_file(filename);
+
+ //   setconsole(0);
+
     clear();
     return 0;
 }
