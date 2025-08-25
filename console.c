@@ -15,6 +15,19 @@
 #include "proc.h"
 #include "x86.h"
 
+//Get raw mode or cooked mode of input. 0 = cooked, 1 = raw
+static int console_raw_mode = 0;
+static int console_echo = 1; //to echo characters when in cooked mode 
+
+
+void
+console_setmode(int raw){
+  cli();
+  console_raw_mode = raw ? 1:0;
+  console_echo = raw ? 0:1;
+  sti();
+}
+
 static void consputc(int);
 
 static int panicked = 0;
@@ -195,6 +208,15 @@ consoleintr(int (*getc)(void))
 
   acquire(&cons.lock);
   while((c = getc()) >= 0){
+    if (console_raw_mode){
+      if(c != 0 && input.e - input.r < INPUT_BUF){
+        input.buf[input.e++ % INPUT_BUF] = c;
+        input.w = input.e;
+        wakeup(&input.r);
+        if(console_echo) consputc(c);
+      }
+      continue;
+    }
     switch(c){
     case C('P'):  // Process listing.
       // procdump() locks cons.lock indirectly; invoke later
@@ -250,6 +272,7 @@ consoleread(struct inode *ip, char *dst, int n)
       }
       sleep(&input.r, &cons.lock);
     }
+    //gets character from input buffer
     c = input.buf[input.r++ % INPUT_BUF];
     if(c == C('D')){  // EOF
       if(n < target){
@@ -261,6 +284,12 @@ consoleread(struct inode *ip, char *dst, int n)
     }
     *dst++ = c;
     --n;
+
+    //RAW mode:Stop immediately if buffer is empty
+if(console_raw_mode && input.r == input.w){
+  break;
+}
+    //Cooked mode newline stop
     if(c == '\n')
       break;
   }

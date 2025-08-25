@@ -184,6 +184,7 @@ UPROGS=\
 	_test\
 	_editor\
 	_clear\
+	_rawdemo\
 
 fs.img: mkfs README test.txt $(UPROGS)
 	./mkfs fs.img README test.txt $(UPROGS)

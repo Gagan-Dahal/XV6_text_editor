@@ -95,3 +95,13 @@ sys_clear(void){
   cprintf("\033[2J\033[H");
   return 0;
 }
+
+int
+sys_setconsole(void){
+  int raw;
+  if(argint(0, &raw) <0){
+    return -1;
+  }
+  console_setmode(raw);
+  return 0;
+}
