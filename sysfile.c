@@ -329,6 +329,14 @@ sys_open(void)
   f->off = 0;
   f->readable = !(omode & O_WRONLY);
   f->writable = (omode & O_WRONLY) || (omode & O_RDWR);
+
+  if(omode & O_APPEND){
+    ilock(ip);
+    //to jump to end of file, the offset is set
+    f->off = ip->size;
+    iunlock(ip);
+  }
+
   return fd;
 }
 

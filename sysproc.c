@@ -89,3 +89,9 @@ sys_uptime(void)
   release(&tickslock);
   return xticks;
 }
+
+int
+sys_clear(void){
+  cprintf("\033[2J\033[H");
+  return 0;
+}
