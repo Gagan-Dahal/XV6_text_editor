@@ -4,11 +4,6 @@
 #include "fcntl.h"
 
 
-/*TO-DO
--Bind ctrl+o as save and ctrl+x as exit
-
-*/
-
 #define MAX_lines 512
 #define MAX_COLS 128
 
@@ -31,6 +26,7 @@ void load_file(const char* filename) {
             buffer[row][column] = '\0';
             column = 0;
             row++;
+            if (row>= MAX_lines){break;}
         }
         else{
             if(column>=MAX_COLS-1){
@@ -82,7 +78,24 @@ void write_file(const char* filename){
             continue;
         }
         if(entered == 24){ //ctrl+x
+            printf(1, "EXITING...\n");
             exit();
+        }
+        if (entered == 8 || entered == 127){ //backspace
+            printf(1, "Backspace pressed\n");
+            if (j>0){
+                j--;
+                buffer[num_lines][j] = '\0';
+                printf(1, "\b \b");
+            }
+            else if(num_lines>0){
+                num_lines--;
+                if(num_lines<line_start){
+                    line_start = num_lines;
+                }
+                j = strlen(buffer[num_lines]);
+            }
+            continue;
         }
         if(entered == '\n'){
             buffer[num_lines][j] = '\0';
@@ -94,6 +107,10 @@ void write_file(const char* filename){
         if(j>=MAX_COLS-1){
             buffer[num_lines][j] = '\0';
             num_lines++;
+            if (num_lines >= MAX_lines){
+                printf(1, "Buffer full! Cannot write more\n");
+                return;
+            }
             j = 0;
         }
     }
@@ -109,13 +126,7 @@ int main(int argc, char*argv[]){
     printf(1, "%s\n", filename);
     load_file(filename);
     display_buffer();
-
-    char c;
-    read(0, &c, 1);
-
     write_file(filename);
-
-    read(0, &c, 1);
-
-    exit();
+    clear();
+    return 0;
 }
